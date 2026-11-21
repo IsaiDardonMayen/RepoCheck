@@ -75,7 +75,12 @@ export interface FetchResponse {
   headers: { get(name: string): string | null };
   json(): Promise<unknown>;
 }
-export type FetchLike = (url: string) => Promise<FetchResponse>;
+export interface FetchInit {
+  method?: 'GET' | 'POST';
+  body?: string;
+  headers?: Record<string, string>;
+}
+export type FetchLike = (url: string, init?: FetchInit) => Promise<FetchResponse>;
 
 export class GitHubError extends Error {
   constructor(
