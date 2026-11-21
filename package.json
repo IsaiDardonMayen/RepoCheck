@@ -1,6 +1,6 @@
 {
   "name": "repocheck",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "type": "module",
   "description": "Revisa un repositorio público o un zip, en cualquier lenguaje, y entrega un reporte de seguridad e higiene.",

@@ -5,6 +5,13 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y e
 
 ## [Sin publicar]
 
+## [1.0.1] - 2026-11-21
+
+### Corregido
+
+- Los archivos de bloqueo (`package-lock.json`, `yarn.lock`, etc.) ya no se revisan en busca de secretos: sus hashes de integridad daban más de 200 falsos positivos. Detectado al probar la página publicada con el propio repo.
+- En monorepos con workspaces, el `package-lock.json` de la raíz cubre los `package.json` internos y ya no se avisa de que falta el lock.
+
 ## [1.0.0] - 2026-11-21
 
 ### Agregado

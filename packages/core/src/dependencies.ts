@@ -263,10 +263,20 @@ export function parseGemfileLock(text: string, file: string): Dependency[] {
  * Con `package-lock.json` en la misma carpeta se usan las versiones exactas;
  * si no, se intenta con `package.json`.
  */
+function hasLockAtOrAbove(lockDirs: ReadonlySet<string>, dir: string): boolean {
+  let d = dir;
+  for (;;) {
+    if (lockDirs.has(d)) return true;
+    if (d === '') return false;
+    d = dirOf(d);
+  }
+}
+
 export function extractDependencies(files: ReadonlyMap<string, string>): DependencyScan {
   const dependencies: Dependency[] = [];
   const notes: string[] = [];
   const lockDirs = new Set<string>();
+  const lockedNames = new Set<string>();
   const cargoLockDirs = new Set<string>();
   const cargoTomls: string[] = [];
 
@@ -278,6 +288,7 @@ export function extractDependencies(files: ReadonlyMap<string, string>): Depende
       continue;
     }
     lockDirs.add(dirOf(path));
+    for (const d of deps) lockedNames.add(d.name);
     dependencies.push(...deps);
   }
 
@@ -288,6 +299,11 @@ export function extractDependencies(files: ReadonlyMap<string, string>): Depende
       if (r === undefined) {
         notes.push(`No se pudo leer ${path}: no es un JSON válido.`);
         continue;
+      }
+      // En un monorepo con workspaces, el package-lock.json de una carpeta superior ya cubre
+      // los paquetes internos: solo se usan los rangos de lo que ese lock no trae.
+      if (hasLockAtOrAbove(lockDirs, dirOf(path))) {
+        r.dependencies = r.dependencies.filter((d) => !lockedNames.has(d.name));
       }
       dependencies.push(...r.dependencies);
       if (r.dependencies.length > 0 || r.unresolved > 0) {
