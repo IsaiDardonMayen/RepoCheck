@@ -6,12 +6,12 @@ Todo el análisis ocurre en el navegador. Solo salen consultas a GitHub (archivo
 flowchart TD
     subgraph Navegador["Navegador de la persona"]
         Entrada["Entrada<br/>URL de repo público o zip"] --> Cargador
-        Cargador["Cargador<br/>árbol + archivos clave, o zip en memoria"] --> Worker
-        subgraph Worker["Web Worker"]
+        Cargador["Cargador<br/>scanRepoUrl / scanZip"] --> Analisis
+        subgraph Analisis["analyze() en @repocheck/core"]
             Detector["Detector de lenguajes<br/>languages.json"] --> Universal["Revisiones universales<br/>secretos, higiene, Docker, workflows"]
             Universal --> PorLenguaje["Revisiones por lenguaje<br/>dependencias y reglas JSON"]
         end
-        Worker --> Nota["Motor de nota<br/>severidad a puntaje A-F"]
+        Analisis --> Nota["Motor de nota<br/>severidad a puntaje A-F"]
         Nota --> Reporte["Reporte y descargas<br/>HTML, PDF, JSON, Markdown"]
     end
     Cargador <-->|"árbol y raw"| GitHub[("GitHub")]
@@ -20,12 +20,24 @@ flowchart TD
 
 ## Paquetes
 
-| Paquete | Responsabilidad | Estado |
-| --- | --- | --- |
-| `@repocheck/core` | Tipos de hallazgos, nota, enmascarado y, más adelante, analizadores | Sprint 0: tipos, nota y enmascarado |
-| `@repocheck/rules` | Tabla de lenguajes y reglas como datos | Sprint 0: tabla de lenguajes |
-| `web` | Interfaz en Angular | Sprint 5 |
-| `cli` | Línea de comandos y GitHub Action | Versión 1.1 |
+| Paquete | Responsabilidad |
+| --- | --- |
+| `@repocheck/core` | Lenguajes, cargadores (`scanRepoUrl`, `scanZip`), analizadores (secretos, higiene, Docker, workflows, código, dependencias), `analyze()`, nota A–F y exportadores (HTML, Markdown, JSON, insignia). Sin DOM |
+| `@repocheck/rules` | Tabla de lenguajes y reglas de secretos y de código, como datos JSON |
+| `@repocheck/web` | Interfaz en Angular: panel con anillo de nota, tarjetas, filtros y descargas. Ver [ADR 0005](adr/0005-panel-minimalista.md) |
+| `cli` | Línea de comandos y GitHub Action (US-15, después de 1.0) |
+
+## Flujo
+
+1. `scanRepoUrl` lee el árbol de GitHub y descarga solo los archivos útiles desde `raw.githubusercontent.com`; `scanZip` lee el zip en memoria con límites de seguridad.
+2. `analyze()` corre todas las revisiones, une duplicados (el secreto prevalece), ordena por gravedad y calcula la nota ([ADR 0004](adr/0004-nota-global.md)).
+3. La interfaz muestra el reporte y genera las descargas con los exportadores del núcleo.
+
+El análisis corre en el hilo principal con operaciones asíncronas; moverlo a un Web Worker es una mejora pendiente para repos muy grandes.
+
+## Publicación
+
+La app se compila con `npm run build` y se publica con `npm run deploy` en la rama `gh-pages` (GitHub Pages gratis, sin CI).
 
 ## Reglas de diseño
 
