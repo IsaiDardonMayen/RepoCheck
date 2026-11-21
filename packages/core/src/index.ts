@@ -8,3 +8,6 @@ export * from './dependencies';
 export * from './osv';
 export * from './secrets';
 export * from './hygiene';
+export * from './dockerfile';
+export * from './workflows';
+export * from './config-files';

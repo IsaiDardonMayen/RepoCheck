@@ -127,6 +127,51 @@ interface Hit {
   valueStart: number;
 }
 
+/** Busca los secretos de una línea; si dos reglas cubren el mismo texto, gana la primera. */
+function findHits(line: string, compiled: readonly Compiled[], nextLine: string): Hit[] {
+  const hits: Hit[] = [];
+  for (const { rule, re } of compiled) {
+    re.lastIndex = 0;
+    for (let m = re.exec(line); m !== null; m = re.exec(line)) {
+      if (m[0].length === 0) {
+        re.lastIndex++;
+        continue;
+      }
+      const group = rule.group ?? 0;
+      const value = m[group] ?? m[0];
+      const valueStart = group === 0 ? m.index : m.index + m[0].indexOf(value);
+      if (isPlaceholder(value)) continue;
+      if (rule.group !== undefined && isCodeReference(value)) continue;
+      if (rule.minEntropy !== undefined && entropy(value) < rule.minEntropy) continue;
+      const start = m.index;
+      const end = m.index + m[0].length;
+      if (hits.some((h) => start < h.end && end > h.start)) continue;
+      if (rule.next !== undefined && !new RegExp(rule.next).test(nextLine)) continue;
+      hits.push({ rule, start, end, value, valueStart });
+    }
+  }
+  return hits;
+}
+
+/**
+ * Enmascara todo secreto que las reglas reconozcan en un texto. Es la última barrera:
+ * se aplica a cualquier fragmento que vaya a mostrarse, venga del módulo que venga.
+ */
+export function redactSecrets(text: string, rules: readonly SecretRule[]): string {
+  const compiled = compile(rules);
+  return text
+    .split('\n')
+    .map((line) => {
+      let out = line;
+      for (const h of findHits(line, compiled, '').sort((a, b) => b.valueStart - a.valueStart)) {
+        if (h.rule.reveal) continue;
+        out = out.slice(0, h.valueStart) + maskSecret(h.value) + out.slice(h.valueStart + h.value.length);
+      }
+      return out;
+    })
+    .join('\n');
+}
+
 /**
  * Busca secretos en los archivos (ruta → texto). Los valores se enmascaran al detectarlos:
  * ningún hallazgo contiene un secreto completo, ni en el fragmento ni en ningún otro campo.
@@ -164,29 +209,7 @@ export function detectSecrets(
       const full = lines[i] as string;
       if (full.length < 8) continue;
       const line = full.length > MAX_LINE ? full.slice(0, MAX_LINE) : full;
-      const hits: Hit[] = [];
-
-      for (const { rule, re } of compiled) {
-        re.lastIndex = 0;
-        for (let m = re.exec(line); m !== null; m = re.exec(line)) {
-          if (m[0].length === 0) {
-            re.lastIndex++;
-            continue;
-          }
-          const group = rule.group ?? 0;
-          const value = m[group] ?? m[0];
-          const valueStart = group === 0 ? m.index : m.index + m[0].indexOf(value);
-          if (isPlaceholder(value)) continue;
-          if (rule.group !== undefined && isCodeReference(value)) continue;
-          if (rule.minEntropy !== undefined && entropy(value) < rule.minEntropy) continue;
-          const start = m.index;
-          const end = m.index + m[0].length;
-          // Si otra regla anterior ya cubrió este texto, esa gana.
-          if (hits.some((h) => start < h.end && end > h.start)) continue;
-          if (rule.next !== undefined && !new RegExp(rule.next).test(lines[i + 1] ?? '')) continue;
-          hits.push({ rule, start, end, value, valueStart });
-        }
-      }
+      const hits = findHits(line, compiled, lines[i + 1] ?? '');
       if (hits.length === 0) continue;
 
       const marked = line.includes(IGNORE_MARKER) || (i > 0 && (lines[i - 1] as string).includes(IGNORE_MARKER));
