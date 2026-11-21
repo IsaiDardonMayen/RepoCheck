@@ -7,6 +7,7 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y e
 
 ### Agregado
 
+- Higiene del repo (US-06): carpetas generadas agrupadas (node_modules, dist, .vs…), archivos `.env`, llaves, bases de datos, registros, binarios y archivos grandes, carpeta `.git` en zips, y falta de `.gitignore`, README o licencia.
 - Detector de secretos (US-05): 28 reglas como datos en `packages/rules/secrets.json` (llaves de AWS, GitHub, GitLab, Slack, Stripe, npm, OpenAI, Anthropic, llaves privadas, JWT, contraseñas en URL, asignaciones y alta entropía), enmascarado al detectar, descarte de marcadores de posición y alfabetos, marca `repocheck:ignore` y lista de falsos positivos, selección de archivos a escanear.
 
 ## [0.3.0] - 2026-11-21
