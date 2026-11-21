@@ -5,6 +5,10 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y e
 
 ## [Sin publicar]
 
+### Agregado
+
+- Revisión de infraestructura (US-07): Dockerfile (imagen sin versión, usuario root, curl|sh, ADD remoto, chmod 777, SSH, secretos en ENV/ARG), docker-compose (privilegiado, red del host, socket de Docker) y workflows de GitHub Actions (acciones sin fijar, permisos, inyección de scripts, pull_request_target). `redactSecrets` enmascara cualquier secreto que quede en un fragmento.
+
 ## [0.4.0] - 2026-11-21
 
 ### Agregado

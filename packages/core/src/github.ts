@@ -174,7 +174,8 @@ export function selectKeyFiles(
     const name = f.path.split('/').pop() ?? f.path;
     const isWorkflow = /^\.github\/workflows\/[^/]+\.ya?ml$/.test(f.path);
     const isEnv = name === '.env' || (name.startsWith('.env.') && !name.endsWith('.example'));
-    if (KEY_NAMES.has(name) || name.endsWith('.csproj') || isWorkflow || isEnv) picked.push(f.path);
+    const isDocker = /^Dockerfile\..+$/.test(name) || /\.dockerfile$/i.test(name) || /^(?:docker-)?compose(?:\..+)?\.ya?ml$/i.test(name);
+    if (KEY_NAMES.has(name) || name.endsWith('.csproj') || isWorkflow || isEnv || isDocker) picked.push(f.path);
   }
   return picked;
 }
