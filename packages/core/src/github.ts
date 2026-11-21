@@ -75,7 +75,12 @@ export interface FetchResponse {
   headers: { get(name: string): string | null };
   json(): Promise<unknown>;
 }
-export type FetchLike = (url: string) => Promise<FetchResponse>;
+export interface FetchInit {
+  method?: 'GET' | 'POST';
+  body?: string;
+  headers?: Record<string, string>;
+}
+export type FetchLike = (url: string, init?: FetchInit) => Promise<FetchResponse>;
 
 export class GitHubError extends Error {
   constructor(
@@ -146,7 +151,7 @@ export async function fetchRepoTree(fetchFn: FetchLike, target: RepoRef): Promis
 const KEY_NAMES = new Set([
   'package.json', 'package-lock.json', 'yarn.lock', 'pnpm-lock.yaml',
   'requirements.txt', 'pyproject.toml', 'Pipfile.lock', 'poetry.lock',
-  'go.mod', 'go.sum', 'pom.xml', 'build.gradle', 'Cargo.lock', 'Cargo.toml',
+  'go.mod', 'go.sum', 'pom.xml', 'build.gradle', 'Cargo.lock', 'Cargo.toml', 'build.gradle.kts', 'packages.config',
   'composer.lock', 'Gemfile.lock', 'packages.lock.json',
   'Dockerfile', 'docker-compose.yml', 'docker-compose.yaml',
   '.gitignore', 'LICENSE', 'LICENSE.md', 'README.md',
@@ -169,7 +174,7 @@ export function selectKeyFiles(
     const name = f.path.split('/').pop() ?? f.path;
     const isWorkflow = /^\.github\/workflows\/[^/]+\.ya?ml$/.test(f.path);
     const isEnv = name === '.env' || (name.startsWith('.env.') && !name.endsWith('.example'));
-    if (KEY_NAMES.has(name) || isWorkflow || isEnv) picked.push(f.path);
+    if (KEY_NAMES.has(name) || name.endsWith('.csproj') || isWorkflow || isEnv) picked.push(f.path);
   }
   return picked;
 }

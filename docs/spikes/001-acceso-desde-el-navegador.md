@@ -34,3 +34,16 @@ Se ejecutó `fetch` desde una página de otro origen (`https://example.com`) en 
 ## Decisión derivada
 
 Ver [ADR 0001](../adr/0001-app-en-el-navegador.md).
+
+## Adenda (Sprint 2, 2026-11-21): detalle de vulnerabilidades en OSV.dev
+
+| Prueba | Resultado | Observación |
+| --- | --- | --- |
+| `GET api.osv.dev/v1/vulns/{id}` | Funciona | Trae resumen, alias, severidad y rangos con la versión corregida |
+| `POST /v1/querybatch` | Funciona | Solo devuelve `id` y `modified`; el detalle hay que pedirlo aparte |
+| Versiones de Go con y sin `v` | Ambas funcionan | `v0.3.0` y `0.3.0` dan el mismo resultado |
+| Nombres de PyPI | Sin distinguir mayúsculas | `Django` y `django` dan el mismo resultado |
+
+**Severidad:** las vulnerabilidades de GitHub traen una etiqueta en `database_specific.severity`. Las demás solo traen el vector CVSS, así que el puntaje se calcula (v3.x). Los vectores CVSS v4 no se calculan todavía y quedan como «media» con un aviso.
+
+**Prueba de punta a punta:** el código real de `core`, empaquetado y ejecutado en el navegador, analizó 4 dependencias (npm, PyPI y Go) y produjo 55 hallazgos únicos con 90 consultas de detalle, sin fallos.

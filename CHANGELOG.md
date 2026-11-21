@@ -5,6 +5,12 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y e
 
 ## [Sin publicar]
 
+## [0.3.0] - 2026-11-21
+
+### Agregado
+
+- Dependencias (US-04): lectura de `package-lock.json`, `package.json`, `requirements.txt`, `go.mod`, `pom.xml`, `Cargo.lock`, `packages.lock.json`, `.csproj`, `packages.config`, `composer.lock` y `Gemfile.lock`; consulta a OSV.dev con una petición por lote; severidad por etiqueta o CVSS v3; versión corregida más cercana; unión de alias duplicados.
+
 ## [0.2.0] - 2026-11-21
 
 ### Agregado
