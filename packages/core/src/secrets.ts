@@ -176,6 +176,13 @@ export function redactSecrets(text: string, rules: readonly SecretRule[]): strin
  * Busca secretos en los archivos (ruta → texto). Los valores se enmascaran al detectarlos:
  * ningún hallazgo contiene un secreto completo, ni en el fragmento ni en ningún otro campo.
  */
+const LOCKFILES = new Set(['package-lock.json', 'npm-shrinkwrap.json', 'yarn.lock', 'pnpm-lock.yaml', 'bun.lock', 'cargo.lock', 'composer.lock', 'poetry.lock', 'pipfile.lock', 'uv.lock', 'go.sum', 'gemfile.lock', 'packages.lock.json']);
+
+/** `true` si el archivo es un archivo de bloqueo de dependencias. */
+export function isLockfile(path: string): boolean {
+  return LOCKFILES.has((path.split('/').pop() ?? path).toLowerCase());
+}
+
 export function detectSecrets(
   files: ReadonlyMap<string, string>,
   rules: readonly SecretRule[],
@@ -193,6 +200,8 @@ export function detectSecrets(
   let capped = 0;
 
   for (const [file, text] of files) {
+    // Los archivos de bloqueo solo traen nombres, versiones y hashes de integridad, nunca secretos.
+    if (isLockfile(file)) continue;
     if (text.length > maxBytes) {
       skippedBig++;
       continue;

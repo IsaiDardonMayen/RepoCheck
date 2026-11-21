@@ -148,3 +148,14 @@ describe('readZip con selección propia', () => {
     expect([...r.contents.keys()]).toEqual(['src/app.ts']);
   });
 });
+
+describe('archivos de bloqueo', () => {
+  it('no se revisan: los hashes de integridad no son secretos', async () => {
+    const { detectSecrets: scan, isLockfile } = await import('../src/index');
+    const hash = 'sha512-' + 'Zk3pQ9vL2mXw8RtYb4NcHd7JfGsAe1UoPiVq6KyMnBxCzTlWjOrDh5EuSgIa0F+/8t3Qx9LmP2vNcRw7Yb4Hd';
+    const files = new Map([['package-lock.json', `"integrity": "${hash}"`]]);
+    expect(scan(files, [{ id: 'ENTROPY', title: 't', severity: 'low', pattern: '[A-Za-z0-9+/]{40,}', fix: 'f' } as never]).findings).toEqual([]);
+    expect(isLockfile('a/b/yarn.lock')).toBe(true);
+    expect(isLockfile('src/lock.ts')).toBe(false);
+  });
+});

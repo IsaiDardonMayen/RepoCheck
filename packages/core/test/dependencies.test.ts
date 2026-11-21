@@ -69,3 +69,13 @@ describe('extractDependencies', () => {
     expect(r.notes.join(' ')).toMatch(/yarn\.lock/);
   });
 });
+
+describe('monorepo con workspaces', () => {
+  it('no avisa por los package.json internos si la raíz tiene package-lock.json', () => {
+    const lock = JSON.stringify({ lockfileVersion: 3, packages: { '': {}, 'node_modules/x': { version: '1.0.0' } } });
+    const pkg = JSON.stringify({ dependencies: { x: '^1.0.0' } });
+    const r = extractDependencies(new Map([['package-lock.json', lock], ['packages/web/package.json', pkg]]));
+    expect(r.notes.join(' ')).not.toContain('sin package-lock');
+    expect(r.dependencies).toHaveLength(1);
+  });
+});
