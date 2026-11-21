@@ -5,6 +5,10 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y e
 
 ## [Sin publicar]
 
+### Agregado
+
+- Detector de secretos (US-05): 28 reglas como datos en `packages/rules/secrets.json` (llaves de AWS, GitHub, GitLab, Slack, Stripe, npm, OpenAI, Anthropic, llaves privadas, JWT, contraseñas en URL, asignaciones y alta entropía), enmascarado al detectar, descarte de marcadores de posición y alfabetos, marca `repocheck:ignore` y lista de falsos positivos, selección de archivos a escanear.
+
 ## [0.3.0] - 2026-11-21
 
 ### Agregado

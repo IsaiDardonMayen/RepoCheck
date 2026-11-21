@@ -102,7 +102,12 @@ function commonRoot(paths: readonly string[]): string | undefined {
  */
 export function readZip(
   data: Uint8Array,
-  options: { limits?: Partial<ZipLimits>; onProgress?: ZipProgress } = {},
+  options: {
+    limits?: Partial<ZipLimits>;
+    onProgress?: ZipProgress;
+    /** Qué archivos descomprimir (por ruta ya sin raíz común). Por defecto, los archivos clave. */
+    select?: (files: readonly FileInfo[]) => string[];
+  } = {},
 ): ZipContents {
   const limits: ZipLimits = { ...DEFAULT_ZIP_LIMITS, ...options.limits };
   const progress = options.onProgress ?? ((): void => undefined);
@@ -141,7 +146,7 @@ export function readZip(
   const strip = (p: string): string => (root ? p.slice(root.length + 1) : p);
   const files: FileInfo[] = entries.map((e) => ({ path: strip(e.name), size: e.originalSize }));
 
-  const keyPaths = new Set(selectKeyFiles(files));
+  const keyPaths = new Set((options.select ?? selectKeyFiles)(files));
   const wanted = new Set(entries.filter((e) => keyPaths.has(strip(e.name))).map((e) => e.name));
   const contents = new Map<string, string>();
   const skipped: { path: string; reason: string }[] = [];

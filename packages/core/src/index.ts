@@ -6,3 +6,4 @@ export * from './github';
 export * from './zip';
 export * from './dependencies';
 export * from './osv';
+export * from './secrets';
