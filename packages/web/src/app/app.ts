@@ -17,6 +17,21 @@ import {
 } from '@repocheck/core';
 import { codeRules, languages, secretRules } from '@repocheck/rules';
 
+function readTheme(): 'auto' | 'dark' | 'light' {
+  try {
+    const t = localStorage.getItem('repocheck-theme');
+    if (t === 'dark' || t === 'light') {
+      document.documentElement.dataset['theme'] = t;
+      return t;
+    }
+  } catch {
+    /* sin almacenamiento: se usa el tema del sistema */
+  }
+  return 'auto';
+}
+
+const LANG_COLORS = ['#6ee7f9', '#7c9cff', '#b79cff', '#f0abfc', '#fda4af', '#fdba74', '#fde68a', '#86efac'];
+
 const RULES: RuleSets = { languageTable: languages, secretRules, codeRules };
 const browserFetch: FetchLike = (url, init) => fetch(url, init as RequestInit);
 
@@ -39,7 +54,6 @@ const GRADE_TEXT: Record<string, string> = {
 
 @Component({
   selector: 'app-root',
-  styleUrl: './app.css',
   templateUrl: './app.html',
 })
 export class App {
@@ -54,6 +68,9 @@ export class App {
   protected readonly error = signal('');
   protected readonly result = signal<ScanResult | undefined>(undefined);
   protected readonly dragging = signal(false);
+  protected readonly mode = signal<'url' | 'zip'>('url');
+  protected readonly theme = signal<'auto' | 'dark' | 'light'>(readTheme());
+  protected readonly circumference = 2 * Math.PI * 52;
 
   protected readonly severityFilter = signal<Severity | ''>('');
   protected readonly categoryFilter = signal<Category | ''>('');
@@ -75,7 +92,42 @@ export class App {
         (!q || `${f.title} ${f.file} ${f.ruleId}`.toLowerCase().includes(q)),
     );
   });
-  protected readonly maxLanguage = computed(() => Math.max(1, ...(this.report()?.languages.languages.map((l) => l.percent) ?? [1])));
+  protected readonly languageSegments = computed(() => {
+    const list = this.report()?.languages.languages ?? [];
+    const top = list.slice(0, 7).map((l, i) => ({ name: l.name, percent: l.percent, color: LANG_COLORS[i % LANG_COLORS.length] ?? '#999' }));
+    const rest = Math.round((list.slice(7).reduce((a, l) => a + l.percent, 0)) * 10) / 10;
+    if (rest > 0) top.push({ name: 'Otros', percent: rest, color: '#64748b' });
+    return top;
+  });
+  protected readonly severityShare = computed(() => {
+    const r = this.report();
+    const total = r ? SEVERITIES.reduce((a, s) => a + r.score.bySeverity[s], 0) : 0;
+    return SEVERITIES.map((s) => ({ sev: s, count: r?.score.bySeverity[s] ?? 0, percent: total ? ((r?.score.bySeverity[s] ?? 0) / total) * 100 : 0 }));
+  });
+  protected readonly categoryRows = computed(() => {
+    const r = this.report();
+    return CATEGORIES.map((c) => ({ id: c, count: r?.score.byCategory[c].count ?? 0, deduction: r?.score.byCategory[c].deduction ?? 0 }));
+  });
+
+  protected setTheme(t: 'auto' | 'dark' | 'light'): void {
+    this.theme.set(t);
+    if (t === 'auto') delete document.documentElement.dataset['theme'];
+    else document.documentElement.dataset['theme'] = t;
+    try {
+      if (t === 'auto') localStorage.removeItem('repocheck-theme');
+      else localStorage.setItem('repocheck-theme', t);
+    } catch {
+      /* sin almacenamiento: el cambio vale solo para esta visita */
+    }
+  }
+
+  protected countFor(sev: Severity): number {
+    return this.report()?.score.bySeverity[sev] ?? 0;
+  }
+
+  protected toggleSeverity(sev: Severity): void {
+    this.severityFilter.set(this.severityFilter() === sev ? '' : sev);
+  }
 
   protected readonly badgeCopied = signal(false);
 

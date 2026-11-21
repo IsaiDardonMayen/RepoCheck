@@ -5,6 +5,14 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y e
 
 ## [Sin publicar]
 
+## [1.1.0] - 2026-11-21
+
+### Cambiado
+
+- Rediseño de la interfaz como panel minimalista (ADR 0005): anillo con la nota, tarjetas de gravedad, categorías y lenguajes, filtros por gravedad como botones, modo oscuro por defecto con selector Auto/Oscuro/Claro, y animaciones que respetan `prefers-reduced-motion`.
+- Reporte HTML y PDF con el mismo diseño: portada con el anillo de nota, tarjetas, barras por categoría y hallazgos que no se cortan entre páginas.
+- README con captura del panel y demostración animada actualizada; arquitectura al día con el flujo real.
+
 ## [1.0.1] - 2026-11-21
 
 ### Corregido
