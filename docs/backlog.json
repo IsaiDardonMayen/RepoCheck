@@ -1,0 +1,191 @@
+{
+  "sprints": [
+    {
+      "number": 0,
+      "title": "Sprint 0 · Fundamentos",
+      "goal": "Repo, plantillas, ADR 001 a 003 y spike de acceso a GitHub y OSV.dev."
+    },
+    {
+      "number": 1,
+      "title": "Sprint 1 · Núcleo y entrada",
+      "goal": "URL y zip con límites seguros y detección de lenguajes."
+    },
+    {
+      "number": 2,
+      "title": "Sprint 2 · Dependencias",
+      "goal": "Lectura de manifiestos y consulta a OSV.dev; primero npm, PyPI y Go."
+    },
+    {
+      "number": 3,
+      "title": "Sprint 3 · Secretos e higiene",
+      "goal": "Detector de secretos con enmascarado y chequeo de higiene del repo."
+    },
+    {
+      "number": 4,
+      "title": "Sprint 4 · Reglas y nota",
+      "goal": "Docker, workflows, motor de reglas y nota global calibrada."
+    },
+    {
+      "number": 5,
+      "title": "Sprint 5 · Interfaz y reporte",
+      "goal": "Angular, gráficas y tabla de hallazgos con filtros."
+    },
+    {
+      "number": 6,
+      "title": "Sprint 6 · Descargas y publicación",
+      "goal": "HTML, PDF, JSON, Markdown, insignia, GitHub Pages y README con GIF."
+    }
+  ],
+  "issues": [
+    {
+      "id": "US-01",
+      "type": "story",
+      "epic": "E1",
+      "sprint": 1,
+      "size": 3,
+      "priority": "high",
+      "title": "Analizar un repo público pegando su URL",
+      "body": "**Historia**\nComo persona que publica un repo, quiero pegar su URL para analizarlo sin descargarlo.\n\n**Criterio de aceptación**\n- [ ] Acepta `github.com/owner/repo`, con o sin `.git` y con rama\n- [ ] Rechaza otros hosts con un mensaje claro\n- [ ] Pide el árbol a GitHub y baja solo archivos clave desde `raw` (ver ADR 0001)"
+    },
+    {
+      "id": "US-02",
+      "type": "story",
+      "epic": "E1",
+      "sprint": 1,
+      "size": 5,
+      "priority": "high",
+      "title": "Analizar un zip sin subirlo",
+      "body": "**Historia**\nComo persona con un proyecto local, quiero soltar un zip para analizarlo sin subirlo.\n\n**Criterio de aceptación**\n- [ ] Límite de 100 MB descomprimido\n- [ ] Rechaza rutas con `../`\n- [ ] Muestra progreso\n- [ ] Nada sale del navegador"
+    },
+    {
+      "id": "US-03",
+      "type": "story",
+      "epic": "E2",
+      "sprint": 1,
+      "size": 3,
+      "priority": "high",
+      "title": "Detectar lenguajes y su proporción",
+      "body": "**Historia**\nQuiero saber qué lenguajes tiene el repo y en qué proporción.\n\n**Criterio de aceptación**\n- [ ] Reconoce 150 o más lenguajes por extensión o nombre de archivo (hoy hay más de 60)\n- [ ] Los desconocidos se listan como «otros» sin fallar"
+    },
+    {
+      "id": "US-04",
+      "type": "story",
+      "epic": "E3",
+      "sprint": 2,
+      "size": 8,
+      "priority": "high",
+      "title": "Detectar dependencias vulnerables o desactualizadas",
+      "body": "**Historia**\nQuiero ver dependencias vulnerables o desactualizadas.\n\n**Criterio de aceptación**\n- [ ] Lee npm, PyPI, Go, Maven, crates.io, NuGet, Packagist y RubyGems\n- [ ] Cada hallazgo trae ID, severidad y versión corregida\n- [ ] Usa `querybatch` de OSV.dev, una petición por análisis"
+    },
+    {
+      "id": "US-05",
+      "type": "story",
+      "epic": "E4",
+      "sprint": 3,
+      "size": 5,
+      "priority": "high",
+      "title": "Detectar secretos expuestos",
+      "body": "**Historia**\nQuiero saber si dejé llaves o contraseñas.\n\n**Criterio de aceptación**\n- [ ] 20 o más patrones, más entropía\n- [ ] Valor siempre enmascarado\n- [ ] Se puede marcar un falso positivo"
+    },
+    {
+      "id": "US-06",
+      "type": "story",
+      "epic": "E5",
+      "sprint": 3,
+      "size": 3,
+      "priority": "medium",
+      "title": "Detectar archivos que no deberían estar versionados",
+      "body": "**Historia**\nQuiero detectar archivos que no deberían estar versionados.\n\n**Criterio de aceptación**\n- [ ] Marca carpetas de compilación, binarios, archivos grandes y `.env`\n- [ ] Avisa si falta `.gitignore`, README o licencia"
+    },
+    {
+      "id": "US-07",
+      "type": "story",
+      "epic": "E6",
+      "sprint": 4,
+      "size": 5,
+      "priority": "medium",
+      "title": "Revisar Dockerfile y workflows",
+      "body": "**Historia**\nQuiero revisar mis Dockerfile y workflows.\n\n**Criterio de aceptación**\n- [ ] Detecta usuario root, etiquetas `latest`, permisos amplios y acciones sin versión fija"
+    },
+    {
+      "id": "US-08",
+      "type": "story",
+      "epic": "E7",
+      "sprint": 4,
+      "size": 8,
+      "priority": "medium",
+      "title": "Revisar código inseguro según el lenguaje",
+      "body": "**Historia**\nQuiero que se revise código inseguro según el lenguaje.\n\n**Criterio de aceptación**\n- [ ] Las reglas se cargan de archivos de datos (ADR 0003)\n- [ ] Sin reglas para un lenguaje, el reporte lo indica"
+    },
+    {
+      "id": "US-09",
+      "type": "story",
+      "epic": "E8",
+      "sprint": 4,
+      "size": 3,
+      "priority": "high",
+      "title": "Calcular una nota global y un resumen",
+      "body": "**Historia**\nQuiero una nota global y un resumen.\n\n**Criterio de aceptación**\n- [ ] Nota de A a F con la fórmula documentada (ADR 007)\n- [ ] Totales por severidad y categoría"
+    },
+    {
+      "id": "US-10",
+      "type": "story",
+      "epic": "E8",
+      "sprint": 5,
+      "size": 5,
+      "priority": "high",
+      "title": "Filtrar los hallazgos",
+      "body": "**Historia**\nQuiero filtrar los hallazgos.\n\n**Criterio de aceptación**\n- [ ] Filtros por severidad, categoría y archivo\n- [ ] Orden por gravedad\n- [ ] Cada hallazgo explica cómo arreglarlo"
+    },
+    {
+      "id": "US-11",
+      "type": "story",
+      "epic": "E8",
+      "sprint": 6,
+      "size": 8,
+      "priority": "high",
+      "title": "Descargar el reporte",
+      "body": "**Historia**\nQuiero descargar el reporte.\n\n**Criterio de aceptación**\n- [ ] Exporta HTML autocontenido, JSON, Markdown y PDF\n- [ ] El HTML se abre sin internet"
+    },
+    {
+      "id": "US-12",
+      "type": "story",
+      "epic": "E8",
+      "sprint": 6,
+      "size": 2,
+      "priority": "low",
+      "title": "Generar una insignia con la nota",
+      "body": "**Historia**\nQuiero una insignia con mi nota.\n\n**Criterio de aceptación**\n- [ ] Genera el fragmento Markdown de la insignia, listo para copiar"
+    },
+    {
+      "id": "US-13",
+      "type": "story",
+      "epic": "E9",
+      "sprint": 5,
+      "size": 5,
+      "priority": "medium",
+      "title": "Usar la herramienta desde el móvil o con teclado",
+      "body": "**Historia**\nQuiero usarlo desde el móvil o con teclado.\n\n**Criterio de aceptación**\n- [ ] Responsive y navegación por teclado\n- [ ] Contraste AA\n- [ ] Sin errores graves en axe"
+    },
+    {
+      "id": "US-14",
+      "type": "story",
+      "epic": "E9",
+      "sprint": 5,
+      "size": 2,
+      "priority": "medium",
+      "title": "Entender qué se analizó y qué no",
+      "body": "**Historia**\nQuiero entender qué se analizó y qué no.\n\n**Criterio de aceptación**\n- [ ] El reporte incluye una sección de cobertura y límites"
+    },
+    {
+      "id": "US-15",
+      "type": "story",
+      "epic": "E10",
+      "sprint": null,
+      "size": 8,
+      "priority": "low",
+      "title": "Usar RepoCheck desde la terminal y en CI (post 1.0)",
+      "body": "**Historia**\nQuiero usarlo desde la terminal y en CI.\n\n**Criterio de aceptación**\n- [ ] CLI `npx repocheck` y GitHub Action con la misma salida\n- [ ] Incluye el historial de git"
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "name": "repocheck",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Revisa un repositorio público o un zip, en cualquier lenguaje, y entrega un reporte de seguridad e higiene.",
+  "license": "MIT",
+  "author": "Isai Dardón Mayén",
+  "engines": {
+    "node": ">=20"
+  },
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "check": "npm run lint && npm run typecheck && npm run test",
+    "bootstrap:github": "node scripts/bootstrap-github.mjs"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@vitest/coverage-v8": "^5.1.1",
+    "eslint": "^10.15.0",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.73.0",
+    "vitest": "^5.1.1"
+  }
+}

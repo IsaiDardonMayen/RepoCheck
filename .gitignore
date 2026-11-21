@@ -1,0 +1,22 @@
+# Dependencias y compilación
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+
+# Entorno y secretos: nunca se versionan
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Editores y sistema
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Registros
+*.log
+npm-debug.log*

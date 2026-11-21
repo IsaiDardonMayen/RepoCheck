@@ -1,0 +1,12 @@
+{
+  "name": "@repocheck/core",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Motor de análisis de RepoCheck. No depende del DOM, así que corre en el navegador y en Node.",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  }
+}
