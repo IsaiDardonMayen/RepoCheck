@@ -1,0 +1,141 @@
+<a class="skip" href="#resultado">Ir al resultado</a>
+<header>
+  <h1>RepoCheck</h1>
+  <p>Revisa la seguridad y la higiene de un repositorio. Gratis, sin cuenta y sin instalar nada: todo ocurre en tu navegador.</p>
+</header>
+
+<main>
+  <section aria-labelledby="entrada">
+    <h2 id="entrada">¿Qué quieres revisar?</h2>
+    <form (submit)="analyzeUrl($event)">
+      <label for="url">URL de un repositorio público de GitHub</label>
+      <div class="row">
+        <input id="url" type="url" inputmode="url" autocomplete="off" placeholder="https://github.com/usuario/repositorio"
+          [value]="url()" (input)="url.set(value($event))" [disabled]="running()" required>
+        <button type="submit" [disabled]="running()">Analizar</button>
+      </div>
+    </form>
+
+    <p class="or">o</p>
+
+    <div class="drop" [class.dragging]="dragging()" (dragover)="over($event, true)" (dragleave)="over($event, false)" (drop)="onDrop($event)">
+      <label for="zip">Arrastra un .zip aquí o elígelo</label>
+      <input id="zip" type="file" accept=".zip,application/zip" [disabled]="running()" (change)="onFile($any($event.target))">
+      <p class="hint">El archivo no sale de tu navegador.</p>
+    </div>
+
+    <p class="hint">Se revisan secretos, dependencias con vulnerabilidades conocidas (consulta a OSV.dev con nombre y versión), Docker, GitHub Actions y código inseguro.</p>
+  </section>
+
+  <div class="status" role="status" aria-live="polite">
+    @if (running()) { <p class="progress">{{ progress() }}</p> }
+  </div>
+  @if (error()) { <p class="error" role="alert">{{ error() }}</p> }
+
+  <section id="resultado" tabindex="-1" aria-labelledby="titulo-resultado">
+    @if (report(); as r) {
+      <h2 id="titulo-resultado">Resultado de {{ result()?.source?.name }}</h2>
+
+      <div class="summary">
+        <div class="grade" [attr.data-grade]="r.score.grade" role="img" [attr.aria-label]="'Nota ' + r.score.grade + ', ' + r.score.score + ' de 100'">
+          <span class="letter">{{ r.score.grade }}</span>
+          <span class="points">{{ r.score.score }}/100</span>
+        </div>
+        <div>
+          <p class="lead">{{ gradeText() }}</p>
+          <ul class="sev">
+            @for (s of severities; track s) {
+              <li [attr.data-sev]="s"><strong>{{ r.score.bySeverity[s] }}</strong> {{ severityLabel[s] }}</li>
+            }
+          </ul>
+        </div>
+      </div>
+
+      <h3>Por categoría</h3>
+      <table class="cats">
+        <caption class="sr">Hallazgos y puntos descontados por categoría</caption>
+        <thead><tr><th scope="col">Categoría</th><th scope="col">Hallazgos</th><th scope="col">Puntos descontados</th></tr></thead>
+        <tbody>
+          @for (c of categories; track c) {
+            <tr><th scope="row">{{ categoryLabel[c] }}</th><td>{{ r.score.byCategory[c].count }}</td><td>{{ r.score.byCategory[c].deduction }}</td></tr>
+          }
+        </tbody>
+      </table>
+
+      <h3>Lenguajes</h3>
+      <ul class="langs">
+        @for (l of r.languages.languages.slice(0, 8); track l.name) {
+          <li>
+            <span class="name">{{ l.name }}</span>
+            <span class="bar" aria-hidden="true"><span [style.width.%]="(l.percent / maxLanguage()) * 100"></span></span>
+            <span class="pct">{{ l.percent }}%</span>
+          </li>
+        }
+      </ul>
+
+      <h3>Hallazgos ({{ visible().length }} de {{ r.findings.length }})</h3>
+      @if (r.findings.length === 0) {
+        <p>No se encontraron hallazgos con las reglas actuales.</p>
+      } @else {
+        <div class="filters">
+          <div><label for="f-sev">Gravedad</label>
+            <select id="f-sev" (change)="severityFilter.set($any(value($event)))">
+              <option value="">Todas</option>
+              @for (s of severities; track s) { <option [value]="s" [selected]="severityFilter() === s">{{ severityLabel[s] }}</option> }
+            </select></div>
+          <div><label for="f-cat">Categoría</label>
+            <select id="f-cat" (change)="categoryFilter.set($any(value($event)))">
+              <option value="">Todas</option>
+              @for (c of categories; track c) { <option [value]="c" [selected]="categoryFilter() === c">{{ categoryLabel[c] }}</option> }
+            </select></div>
+          <div class="grow"><label for="f-q">Buscar</label>
+            <input id="f-q" type="search" placeholder="archivo, regla o título" [value]="query()" (input)="query.set(value($event))"></div>
+          <button type="button" class="ghost" (click)="resetFilters()">Limpiar filtros</button>
+        </div>
+
+        @if (visible().length === 0) {
+          <p>Ningún hallazgo coincide con los filtros.</p>
+        } @else {
+          <ul class="findings">
+            @for (f of visible(); track $index) {
+              <li [attr.data-sev]="f.severity">
+                <button type="button" class="head" [attr.aria-expanded]="expanded().has($index)" [attr.aria-controls]="'d' + $index" (click)="toggle($index)">
+                  <span class="badge">{{ severityLabel[f.severity] }}</span>
+                  <span class="title">{{ f.title }}</span>
+                  <span class="where">{{ f.file }}@if (f.line) {:{{ f.line }}}</span>
+                </button>
+                @if (expanded().has($index)) {
+                  <div class="detail" [id]="'d' + $index">
+                    <p><strong>Categoría:</strong> {{ categoryLabel[f.category] }} · <strong>Regla:</strong> {{ f.ruleId }}</p>
+                    @if (f.snippet) { <pre>{{ f.snippet }}</pre> }
+                    <p><strong>Cómo arreglarlo:</strong> {{ f.fix }}</p>
+                  </div>
+                }
+              </li>
+            }
+          </ul>
+        }
+      }
+
+      <h3>Qué se revisó y qué no</h3>
+      <ul class="coverage">
+        <li>{{ r.coverage.filesInRepo }} archivos en el repositorio; se leyeron {{ r.coverage.filesRead }} (los de código, configuración y manifiestos).</li>
+        <li>{{ r.coverage.dependenciesChecked }} dependencias @if (r.coverage.vulnerabilitiesChecked) { consultadas en OSV.dev } @else { <strong>sin consultar</strong> }.</li>
+        @if (r.code.analyzed.length) {
+          <li>Código revisado con reglas propias: {{ r.code.analyzed.length }} lenguaje(s)
+            ({{ r.code.analyzed.map(l => l.language + ': ' + l.files).join(', ') }}).</li>
+        }
+        @if (r.code.withoutRules.length) {
+          <li>Sin reglas de código para: {{ r.code.withoutRules.map(l => l.language).join(', ') }}. Solo recibieron las revisiones universales (secretos, higiene, Docker, workflows).</li>
+        }
+        @if (r.duplicatesRemoved) { <li>{{ r.duplicatesRemoved }} hallazgo(s) repetido(s) se unieron en uno.</li> }
+        @for (n of r.notes; track n) { <li>{{ n }}</li> }
+      </ul>
+      <p class="hint">RepoCheck usa reglas heurísticas: puede pasar por alto problemas y marcar falsos positivos. No reemplaza una auditoría.</p>
+    }
+  </section>
+</main>
+
+<footer>
+  <p>Código abierto (MIT) · <a href="https://github.com/IsaiDardonMayen/RepoCheck">GitHub</a> · Los secretos encontrados siempre se muestran enmascarados.</p>
+</footer>

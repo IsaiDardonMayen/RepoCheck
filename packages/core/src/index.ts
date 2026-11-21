@@ -13,3 +13,4 @@ export * from './workflows';
 export * from './config-files';
 export * from './code';
 export * from './analyze';
+export * from './pipeline';

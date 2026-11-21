@@ -5,6 +5,14 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y e
 
 ## [Sin publicar]
 
+## [0.6.0] - 2026-11-21
+
+### Agregado
+
+- Interfaz en Angular (US-10, US-13, US-14): campo de URL y zip arrastrable, progreso, nota A–F, resumen por gravedad y categoría, gráfica de lenguajes, lista de hallazgos con filtros (gravedad, categoría, texto) y detalle con cómo arreglarlo, y la sección «Qué se revisó y qué no». Accesible por teclado, con modo oscuro y sin errores de axe.
+- Pipeline `scanRepoUrl` y `scanZip`: descargan o leen los archivos y llaman a `analyze`. Solo peticiones públicas desde el navegador.
+- `npm run dev` para probar la app y `npm run build` para generarla.
+
 ## [0.5.0] - 2026-11-21
 
 ### Agregado
