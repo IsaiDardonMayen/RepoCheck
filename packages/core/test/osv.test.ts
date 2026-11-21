@@ -4,8 +4,8 @@ import {
   type Dependency, type FetchLike, type FetchResponse, type OsvVuln,
 } from '../src/index';
 
-const ok = (v: unknown): FetchResponse => ({ ok: true, status: 200, headers: { get: () => null }, json: async () => v });
-const bad = (status: number): FetchResponse => ({ ok: false, status, headers: { get: () => null }, json: async () => ({}) });
+const ok = (v: unknown): FetchResponse => ({ ok: true, status: 200, headers: { get: () => null }, json: async () => v, text: async () => JSON.stringify(v) });
+const bad = (status: number): FetchResponse => ({ ok: false, status, headers: { get: () => null }, json: async () => ({}), text: async () => "" });
 
 describe('cvss3Score', () => {
   it('coincide con los puntajes publicados', () => {

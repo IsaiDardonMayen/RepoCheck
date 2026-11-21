@@ -4,9 +4,9 @@ import {
   type FetchLike, type FetchResponse,
 } from '../src/index';
 
-const ok = (v: unknown): FetchResponse => ({ ok: true, status: 200, headers: { get: () => null }, json: async () => v });
+const ok = (v: unknown): FetchResponse => ({ ok: true, status: 200, headers: { get: () => null }, json: async () => v, text: async () => JSON.stringify(v) });
 const fail = (status: number, headers: Record<string, string> = {}): FetchResponse => ({
-  ok: false, status, headers: { get: (n) => headers[n.toLowerCase()] ?? null }, json: async () => ({}),
+  ok: false, status, headers: { get: (n) => headers[n.toLowerCase()] ?? null }, json: async () => ({}), text: async () => "",
 });
 
 describe('parseRepoUrl', () => {

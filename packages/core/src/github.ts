@@ -74,6 +74,7 @@ export interface FetchResponse {
   status: number;
   headers: { get(name: string): string | null };
   json(): Promise<unknown>;
+  text(): Promise<string>;
 }
 export interface FetchInit {
   method?: 'GET' | 'POST';
