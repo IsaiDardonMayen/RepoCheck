@@ -1,4 +1,5 @@
 import languagesData from '../languages.json';
+import codeData from '../code-rules.json';
 import secretsData from '../secrets.json';
 
 export type LanguageKind = 'programming' | 'markup' | 'data' | 'config' | 'query';
@@ -49,3 +50,28 @@ export interface SecretsFile {
 
 export const secretsFile = secretsData as SecretsFile;
 export const secretRules: readonly SecretRuleEntry[] = secretsFile.rules;
+
+export interface CodeRuleEntry {
+  id: string;
+  /** Nombres de lenguaje de languages.json a los que aplica. */
+  languages: string[];
+  severity: 'critical' | 'high' | 'medium' | 'low';
+  title: string;
+  /** Expresión regular de JavaScript, evaluada línea por línea. */
+  pattern: string;
+  flags?: string;
+  fix: string;
+  /** Ejemplo que la regla debe detectar. */
+  bad: string;
+  /** Ejemplo seguro que la regla no debe detectar. */
+  good: string;
+}
+
+export interface CodeRulesFile {
+  version: number;
+  description: string;
+  rules: CodeRuleEntry[];
+}
+
+export const codeRulesFile = codeData as CodeRulesFile;
+export const codeRules: readonly CodeRuleEntry[] = codeRulesFile.rules;

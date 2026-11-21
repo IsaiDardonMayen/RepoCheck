@@ -17,24 +17,30 @@
 
 ## Agregar una regla de código inseguro
 
-Las reglas por lenguaje se incorporan en el Sprint 4. El formato previsto es:
+Las reglas viven en `packages/rules/code-rules.json`. Agrega una entrada:
 
 ```json
 {
-  "id": "JS-EVAL-001",
-  "language": "JavaScript",
-  "category": "code",
-  "severity": "medium",
-  "pattern": "\\beval\\s*\\(",
+  "id": "JS-EVAL",
+  "languages": ["JavaScript", "TypeScript"],
+  "severity": "high",
   "title": "Uso de eval",
-  "why": "Ejecuta texto como código y abre la puerta a inyecciones.",
-  "fix": "Evita eval; usa JSON.parse o funciones explícitas."
+  "pattern": "\\beval\\s*\\(",
+  "fix": "Evita eval: usa JSON.parse para datos o funciones explícitas.",
+  "bad": "const r = eval(input);",
+  "good": "const r = JSON.parse(input);"
 }
 ```
 
+- `languages` usa los nombres exactos de `languages.json`.
+- `pattern` es una expresión regular de JavaScript que se evalúa **línea por línea**. Agrega `"flags": "i"` si no distingue mayúsculas.
+- `bad` debe ser detectado y `good` no: las pruebas lo verifican solas con `npm test`.
+
 Criterios para aceptar una regla:
 
-- El patrón debe ser eficiente: sin cuantificadores anidados que puedan causar expresiones lentas.
-- Debe explicar por qué importa y cómo arreglarlo.
-- Debe tener al menos una prueba con un caso positivo y uno negativo.
-- Cualquier secreto de ejemplo en las pruebas debe ser falso y estar claramente marcado.
+- El patrón debe ser eficiente: sin cuantificadores anidados que puedan causar expresiones lentas, y sin `lookbehind` (algunos navegadores antiguos no lo soportan).
+- Debe preferir pocos falsos positivos: es mejor no detectar un caso raro que marcar código correcto.
+- Debe explicar cómo arreglarlo.
+- Las líneas de comentario y los archivos de pruebas se omiten automáticamente.
+
+Un lenguaje sin reglas no falla: sigue recibiendo las revisiones universales y el reporte lo indica.
