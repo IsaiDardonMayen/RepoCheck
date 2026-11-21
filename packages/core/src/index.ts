@@ -11,3 +11,4 @@ export * from './hygiene';
 export * from './dockerfile';
 export * from './workflows';
 export * from './config-files';
+export * from './code';
