@@ -11,6 +11,8 @@ RepoCheck analiza un repositorio público de GitHub o un archivo zip, en cualqui
 
 ![Demostración](docs/demo.gif)
 
+![Panel de resultados](docs/panel.png)
+
 ## Qué revisa
 
 - Dependencias con vulnerabilidades conocidas (contra [OSV.dev](https://osv.dev); solo se envían nombre y versión).
@@ -23,7 +25,7 @@ Funciona con cualquier lenguaje en tres niveles: las revisiones universales siem
 
 ## Descargas
 
-El reporte se puede bajar en HTML, PDF, JSON y Markdown, y hay una insignia (SVG o Markdown para tu README) con tu nota.
+La interfaz es un panel con modo oscuro y claro. El reporte se puede bajar en HTML y PDF (con el mismo diseño), JSON y Markdown, y hay una insignia (SVG o Markdown para tu README) con tu nota.
 
 ## Cómo está organizado
 
