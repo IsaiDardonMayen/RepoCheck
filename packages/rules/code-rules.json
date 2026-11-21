@@ -1,0 +1,517 @@
+{
+  "version": 1,
+  "description": "Reglas de código inseguro de RepoCheck, por lenguaje. `languages` usa los nombres de languages.json. `bad` debe coincidir con el patrón y `good` no; las pruebas lo verifican. Son heurísticas por línea: pueden dar falsos positivos y no reemplazan una revisión.",
+  "rules": [
+    {
+      "id": "JS-EVAL",
+      "languages": [
+        "JavaScript",
+        "TypeScript"
+      ],
+      "severity": "high",
+      "title": "Uso de eval",
+      "pattern": "\\beval\\s*\\(",
+      "fix": "Evita eval: usa JSON.parse para datos o funciones explícitas.",
+      "bad": "const r = eval(input);",
+      "good": "const r = JSON.parse(input);"
+    },
+    {
+      "id": "JS-NEW-FUNCTION",
+      "languages": [
+        "JavaScript",
+        "TypeScript"
+      ],
+      "severity": "high",
+      "title": "Código creado con new Function",
+      "pattern": "\\bnew\\s+Function\\s*\\(",
+      "fix": "No generes código desde texto: usa funciones normales o una tabla de operaciones permitidas.",
+      "bad": "const f = new Function('a', body);",
+      "good": "const f = (a) => a + 1;"
+    },
+    {
+      "id": "JS-INNERHTML",
+      "languages": [
+        "JavaScript",
+        "TypeScript"
+      ],
+      "severity": "medium",
+      "title": "Asignación a innerHTML (riesgo de XSS)",
+      "pattern": "\\.(?:innerHTML|outerHTML)\\s*=[^=]",
+      "fix": "Usa textContent, o sanea el HTML con una librería como DOMPurify antes de insertarlo.",
+      "bad": "el.innerHTML = userInput;",
+      "good": "el.textContent = userInput;"
+    },
+    {
+      "id": "JS-DOCUMENT-WRITE",
+      "languages": [
+        "JavaScript",
+        "TypeScript"
+      ],
+      "severity": "medium",
+      "title": "Uso de document.write",
+      "pattern": "\\bdocument\\.write(?:ln)?\\s*\\(",
+      "fix": "Crea los nodos con el DOM (createElement) en lugar de escribir HTML como texto.",
+      "bad": "document.write(html);",
+      "good": "document.body.append(node);"
+    },
+    {
+      "id": "JS-EXEC-INJECTION",
+      "languages": [
+        "JavaScript",
+        "TypeScript"
+      ],
+      "severity": "high",
+      "title": "Comando del sistema armado con texto variable",
+      "pattern": "\\bexec(?:Sync)?\\s*\\(\\s*(?:`[^`]*\\$\\{|['\\\"][^'\\\"]*['\\\"]\\s*\\+)",
+      "fix": "Usa execFile o spawn con un arreglo de argumentos, sin pasar por el shell.",
+      "bad": "exec(`ls ${dir}`);",
+      "good": "execFile('ls', [dir]);"
+    },
+    {
+      "id": "JS-REACT-DANGEROUS-HTML",
+      "languages": [
+        "JavaScript",
+        "TypeScript"
+      ],
+      "severity": "medium",
+      "title": "dangerouslySetInnerHTML (riesgo de XSS)",
+      "pattern": "dangerouslySetInnerHTML",
+      "fix": "Evítalo, o sanea el contenido con DOMPurify antes de pasarlo.",
+      "bad": "<div dangerouslySetInnerHTML={{__html: h}} />",
+      "good": "<div>{text}</div>"
+    },
+    {
+      "id": "JS-WEAK-RANDOM",
+      "languages": [
+        "JavaScript",
+        "TypeScript"
+      ],
+      "severity": "medium",
+      "title": "Math.random usado para algo de seguridad",
+      "pattern": "(?:token|secret|password|passwd|nonce|salt|session)[^\\n]{0,40}Math\\.random\\s*\\(|Math\\.random\\s*\\([^\\n]{0,40}(?:token|secret|password|nonce|salt)",
+      "flags": "i",
+      "fix": "Usa crypto.getRandomValues o crypto.randomBytes: Math.random es predecible.",
+      "bad": "const token = Math.random().toString(36);",
+      "good": "const token = crypto.randomUUID();"
+    },
+    {
+      "id": "JS-TLS-DISABLED",
+      "languages": [
+        "JavaScript",
+        "TypeScript"
+      ],
+      "severity": "high",
+      "title": "Se desactiva la verificación de certificados TLS",
+      "pattern": "rejectUnauthorized\\s*:\\s*false|NODE_TLS_REJECT_UNAUTHORIZED\\s*=\\s*['\\\"]?0",
+      "fix": "No desactives la verificación: instala el certificado correcto o agrega tu CA de confianza.",
+      "bad": "https.request({ rejectUnauthorized: false });",
+      "good": "https.request({ rejectUnauthorized: true });"
+    },
+    {
+      "id": "JS-WEAK-HASH",
+      "languages": [
+        "JavaScript",
+        "TypeScript"
+      ],
+      "severity": "medium",
+      "title": "Hash débil (MD5 o SHA-1)",
+      "pattern": "createHash\\(\\s*['\\\"](?:md5|sha1)['\\\"]\\s*\\)",
+      "fix": "Usa SHA-256 o superior; para contraseñas, bcrypt, scrypt o argon2.",
+      "bad": "crypto.createHash('md5').update(p);",
+      "good": "crypto.createHash('sha256').update(p);"
+    },
+    {
+      "id": "JS-SQL-CONCAT",
+      "languages": [
+        "JavaScript",
+        "TypeScript"
+      ],
+      "severity": "high",
+      "title": "Consulta SQL armada con texto variable (inyección SQL)",
+      "pattern": "\\.(?:query|execute)\\s*\\(\\s*(?:`[^`]*\\$\\{|['\\\"][^'\\\"]*(?:select|insert|update|delete)[^'\\\"]*['\\\"]\\s*\\+)",
+      "flags": "i",
+      "fix": "Usa consultas parametrizadas: db.query('SELECT * FROM t WHERE id = $1', [id]).",
+      "bad": "db.query('SELECT * FROM t WHERE id = ' + id);",
+      "good": "db.query('SELECT * FROM t WHERE id = $1', [id]);"
+    },
+    {
+      "id": "PY-EVAL-EXEC",
+      "languages": [
+        "Python"
+      ],
+      "severity": "high",
+      "title": "Uso de eval o exec",
+      "pattern": "(?:^|[^\\w.])(?:eval|exec)\\s*\\(",
+      "fix": "Evita eval y exec: usa ast.literal_eval para datos o funciones explícitas.",
+      "bad": "x = eval(user_input)",
+      "good": "x = ast.literal_eval(user_input)"
+    },
+    {
+      "id": "PY-PICKLE",
+      "languages": [
+        "Python"
+      ],
+      "severity": "high",
+      "title": "Deserialización con pickle",
+      "pattern": "\\b(?:pickle|cPickle|dill)\\.loads?\\s*\\(",
+      "fix": "pickle puede ejecutar código al cargar datos: usa JSON u otro formato seguro, y nunca cargues datos no confiables.",
+      "bad": "data = pickle.loads(blob)",
+      "good": "data = json.loads(blob)"
+    },
+    {
+      "id": "PY-YAML-LOAD",
+      "languages": [
+        "Python"
+      ],
+      "severity": "high",
+      "title": "yaml.load sin cargador seguro",
+      "pattern": "\\byaml\\.load\\s*\\((?![^)]*Loader\\s*=\\s*(?:yaml\\.)?C?SafeLoader)",
+      "fix": "Usa yaml.safe_load.",
+      "bad": "cfg = yaml.load(text)",
+      "good": "cfg = yaml.safe_load(text)"
+    },
+    {
+      "id": "PY-SUBPROCESS-SHELL",
+      "languages": [
+        "Python"
+      ],
+      "severity": "high",
+      "title": "subprocess con shell=True",
+      "pattern": "subprocess\\.\\w+\\s*\\([^)]*shell\\s*=\\s*True",
+      "fix": "Pasa los argumentos como lista y sin shell=True: subprocess.run(['ls', d]).",
+      "bad": "subprocess.run(cmd, shell=True)",
+      "good": "subprocess.run(['ls', d])"
+    },
+    {
+      "id": "PY-OS-SYSTEM",
+      "languages": [
+        "Python"
+      ],
+      "severity": "medium",
+      "title": "os.system u os.popen",
+      "pattern": "\\bos\\.(?:system|popen)\\s*\\(",
+      "fix": "Usa subprocess.run con una lista de argumentos.",
+      "bad": "os.system('ls ' + d)",
+      "good": "subprocess.run(['ls', d])"
+    },
+    {
+      "id": "PY-VERIFY-FALSE",
+      "languages": [
+        "Python"
+      ],
+      "severity": "high",
+      "title": "Se desactiva la verificación de certificados (verify=False)",
+      "pattern": "verify\\s*=\\s*False",
+      "fix": "No desactives la verificación TLS: configura el certificado correcto.",
+      "bad": "requests.get(url, verify=False)",
+      "good": "requests.get(url)"
+    },
+    {
+      "id": "PY-DEBUG-TRUE",
+      "languages": [
+        "Python"
+      ],
+      "severity": "medium",
+      "title": "Modo depuración activado",
+      "pattern": "\\bapp\\.run\\([^)]*debug\\s*=\\s*True|^\\s*DEBUG\\s*=\\s*True\\b",
+      "fix": "Desactiva el modo debug en producción: puede exponer código y variables.",
+      "bad": "app.run(debug=True)",
+      "good": "app.run(debug=False)"
+    },
+    {
+      "id": "PY-WEAK-HASH",
+      "languages": [
+        "Python"
+      ],
+      "severity": "medium",
+      "title": "Hash débil (MD5 o SHA-1)",
+      "pattern": "hashlib\\.(?:md5|sha1)\\s*\\(",
+      "fix": "Usa hashlib.sha256 o superior; para contraseñas, bcrypt, scrypt o argon2.",
+      "bad": "hashlib.md5(p)",
+      "good": "hashlib.sha256(p)"
+    },
+    {
+      "id": "PY-SQL-FORMAT",
+      "languages": [
+        "Python"
+      ],
+      "severity": "high",
+      "title": "Consulta SQL armada con texto variable (inyección SQL)",
+      "pattern": "\\.execute\\s*\\(\\s*(?:f['\\\"]|['\\\"][^'\\\"]*(?:select|insert|update|delete)[^'\\\"]*['\\\"]\\s*(?:%|\\+|\\.format))",
+      "flags": "i",
+      "fix": "Usa parámetros: cursor.execute('SELECT * FROM t WHERE id = %s', (id,)).",
+      "bad": "cur.execute('SELECT * FROM t WHERE id = ' + id)",
+      "good": "cur.execute('SELECT * FROM t WHERE id = %s', (id,))"
+    },
+    {
+      "id": "JAVA-RUNTIME-EXEC",
+      "languages": [
+        "Java"
+      ],
+      "severity": "medium",
+      "title": "Ejecución de comandos con Runtime.exec",
+      "pattern": "Runtime\\.getRuntime\\(\\)\\.exec\\s*\\(",
+      "fix": "Usa ProcessBuilder con una lista de argumentos y valida cualquier dato externo.",
+      "bad": "Runtime.getRuntime().exec(cmd);",
+      "good": "new ProcessBuilder(\"ls\", dir).start();"
+    },
+    {
+      "id": "JAVA-WEAK-CRYPTO",
+      "languages": [
+        "Java"
+      ],
+      "severity": "medium",
+      "title": "Algoritmo criptográfico débil",
+      "pattern": "getInstance\\(\\s*\\\"(?:DES|DESede|RC4|MD5|SHA-?1|AES/ECB[^\\\"]*)\\\"\\s*\\)",
+      "fix": "Usa AES/GCM y SHA-256 o superior.",
+      "bad": "Cipher.getInstance(\"DES\");",
+      "good": "Cipher.getInstance(\"AES/GCM/NoPadding\");"
+    },
+    {
+      "id": "JAVA-SQL-CONCAT",
+      "languages": [
+        "Java"
+      ],
+      "severity": "high",
+      "title": "Consulta SQL armada con texto variable (inyección SQL)",
+      "pattern": "(?:execute(?:Query|Update)?|prepareStatement)\\s*\\(\\s*\\\"[^\\\"]*(?:select|insert|update|delete)[^\\\"]*\\\"\\s*\\+",
+      "flags": "i",
+      "fix": "Usa PreparedStatement con parámetros (?).",
+      "bad": "st.executeQuery(\"SELECT * FROM t WHERE id = \" + id);",
+      "good": "conn.prepareStatement(\"SELECT * FROM t WHERE id = ?\");"
+    },
+    {
+      "id": "JAVA-DESERIALIZATION",
+      "languages": [
+        "Java"
+      ],
+      "severity": "medium",
+      "title": "Deserialización con ObjectInputStream",
+      "pattern": "new\\s+ObjectInputStream\\s*\\(",
+      "fix": "Evita deserializar datos no confiables; usa JSON o un filtro de clases (ObjectInputFilter).",
+      "bad": "new ObjectInputStream(in);",
+      "good": "mapper.readValue(in, Dto.class);"
+    },
+    {
+      "id": "CS-SQL-CONCAT",
+      "languages": [
+        "C#"
+      ],
+      "severity": "high",
+      "title": "Consulta SQL armada con texto variable (inyección SQL)",
+      "pattern": "new\\s+SqlCommand\\s*\\(\\s*(?:\\$\\\"|\\\"[^\\\"]*(?:select|insert|update|delete)[^\\\"]*\\\"\\s*\\+)",
+      "flags": "i",
+      "fix": "Usa parámetros: cmd.Parameters.AddWithValue(\"@id\", id).",
+      "bad": "new SqlCommand(\"SELECT * FROM t WHERE id = \" + id, c);",
+      "good": "new SqlCommand(\"SELECT * FROM t WHERE id = @id\", c);"
+    },
+    {
+      "id": "CS-BINARYFORMATTER",
+      "languages": [
+        "C#"
+      ],
+      "severity": "high",
+      "title": "Uso de BinaryFormatter",
+      "pattern": "\\bBinaryFormatter\\b",
+      "fix": "BinaryFormatter es inseguro y está obsoleto: usa System.Text.Json.",
+      "bad": "var f = new BinaryFormatter();",
+      "good": "JsonSerializer.Deserialize<T>(s);"
+    },
+    {
+      "id": "CS-WEAK-HASH",
+      "languages": [
+        "C#"
+      ],
+      "severity": "medium",
+      "title": "Hash débil (MD5 o SHA-1)",
+      "pattern": "\\b(?:MD5|SHA1)(?:CryptoServiceProvider|Managed)\\b|\\b(?:MD5|SHA1)\\.Create\\s*\\(",
+      "fix": "Usa SHA256 o superior; para contraseñas, Rfc2898DeriveBytes con muchas iteraciones.",
+      "bad": "var h = MD5.Create();",
+      "good": "var h = SHA256.Create();"
+    },
+    {
+      "id": "PHP-EVAL",
+      "languages": [
+        "PHP"
+      ],
+      "severity": "high",
+      "title": "Uso de eval",
+      "pattern": "\\beval\\s*\\(",
+      "fix": "Evita eval: usa estructuras de datos y funciones explícitas.",
+      "bad": "eval($code);",
+      "good": "call_user_func($permitida);"
+    },
+    {
+      "id": "PHP-COMMAND-EXEC",
+      "languages": [
+        "PHP"
+      ],
+      "severity": "high",
+      "title": "Comando del sistema con variable",
+      "pattern": "\\b(?:system|shell_exec|passthru|exec|popen|proc_open)\\s*\\(\\s*\\$",
+      "fix": "Valida con una lista de permitidos y usa escapeshellarg para cada argumento.",
+      "bad": "system($cmd);",
+      "good": "system('ls ' . escapeshellarg($d));"
+    },
+    {
+      "id": "PHP-UNSERIALIZE",
+      "languages": [
+        "PHP"
+      ],
+      "severity": "high",
+      "title": "unserialize sobre una variable",
+      "pattern": "\\bunserialize\\s*\\(\\s*\\$",
+      "fix": "unserialize puede ejecutar código: usa json_decode para datos externos.",
+      "bad": "unserialize($data);",
+      "good": "json_decode($data, true);"
+    },
+    {
+      "id": "PHP-INCLUDE-INPUT",
+      "languages": [
+        "PHP"
+      ],
+      "severity": "critical",
+      "title": "include o require con datos del usuario",
+      "pattern": "\\b(?:include|require)(?:_once)?\\s*\\(?\\s*\\$_(?:GET|POST|REQUEST|COOKIE)",
+      "fix": "Nunca incluyas archivos según la entrada del usuario: usa una lista de páginas permitidas.",
+      "bad": "include $_GET['page'];",
+      "good": "include 'paginas/inicio.php';"
+    },
+    {
+      "id": "PHP-SQL-INPUT",
+      "languages": [
+        "PHP"
+      ],
+      "severity": "high",
+      "title": "Consulta SQL con datos del usuario",
+      "pattern": "\\bmysqli?_query\\s*\\([^;]*\\$_(?:GET|POST|REQUEST)",
+      "fix": "Usa consultas preparadas (PDO o mysqli con parámetros).",
+      "bad": "mysqli_query($c, \"SELECT * FROM t WHERE id=\" . $_GET['id']);",
+      "good": "$st = $pdo->prepare('SELECT * FROM t WHERE id = ?');"
+    },
+    {
+      "id": "GO-INSECURE-TLS",
+      "languages": [
+        "Go"
+      ],
+      "severity": "high",
+      "title": "Se desactiva la verificación de certificados TLS",
+      "pattern": "InsecureSkipVerify\\s*:\\s*true",
+      "fix": "No desactives la verificación: configura la CA correcta en RootCAs.",
+      "bad": "&tls.Config{InsecureSkipVerify: true}",
+      "good": "&tls.Config{MinVersion: tls.VersionTLS12}"
+    },
+    {
+      "id": "GO-EXEC-SHELL",
+      "languages": [
+        "Go"
+      ],
+      "severity": "medium",
+      "title": "Comando ejecutado a través del shell",
+      "pattern": "exec\\.Command\\(\\s*\\\"(?:sh|bash)\\\"\\s*,\\s*\\\"-c\\\"",
+      "fix": "Llama al programa directamente con sus argumentos, sin pasar por sh -c.",
+      "bad": "exec.Command(\"sh\", \"-c\", cmd)",
+      "good": "exec.Command(\"ls\", dir)"
+    },
+    {
+      "id": "GO-WEAK-HASH",
+      "languages": [
+        "Go"
+      ],
+      "severity": "medium",
+      "title": "Hash débil (MD5 o SHA-1)",
+      "pattern": "\\b(?:md5|sha1)\\.(?:New|Sum)\\s*\\(",
+      "fix": "Usa crypto/sha256 o superior; para contraseñas, bcrypt o argon2.",
+      "bad": "md5.Sum(data)",
+      "good": "sha256.Sum256(data)"
+    },
+    {
+      "id": "C-GETS",
+      "languages": [
+        "C",
+        "C++"
+      ],
+      "severity": "critical",
+      "title": "Uso de gets (desbordamiento de memoria)",
+      "pattern": "\\bgets\\s*\\(",
+      "fix": "gets no puede limitar el tamaño y fue eliminada del estándar: usa fgets(buf, sizeof buf, stdin).",
+      "bad": "gets(buf);",
+      "good": "fgets(buf, sizeof buf, stdin);"
+    },
+    {
+      "id": "C-UNSAFE-STRING",
+      "languages": [
+        "C",
+        "C++"
+      ],
+      "severity": "high",
+      "title": "Función de cadenas sin control de tamaño",
+      "pattern": "\\b(?:strcpy|strcat|sprintf|vsprintf)\\s*\\(",
+      "fix": "Usa snprintf, strncpy/strlcpy o std::string, indicando siempre el tamaño del destino.",
+      "bad": "strcpy(dst, src);",
+      "good": "snprintf(dst, sizeof dst, \"%s\", src);"
+    },
+    {
+      "id": "C-SCANF-STRING",
+      "languages": [
+        "C",
+        "C++"
+      ],
+      "severity": "high",
+      "title": "scanf de cadena sin límite",
+      "pattern": "\\bscanf\\s*\\(\\s*\\\"%s\\\"",
+      "fix": "Indica el ancho máximo (por ejemplo %63s) o usa fgets.",
+      "bad": "scanf(\"%s\", buf);",
+      "good": "scanf(\"%63s\", buf);"
+    },
+    {
+      "id": "C-SYSTEM",
+      "languages": [
+        "C",
+        "C++"
+      ],
+      "severity": "medium",
+      "title": "Uso de system()",
+      "pattern": "\\bsystem\\s*\\(",
+      "fix": "Evita system: usa execv u otra API sin shell y valida cualquier dato externo.",
+      "bad": "system(cmd);",
+      "good": "execv(path, args);"
+    },
+    {
+      "id": "RB-EVAL",
+      "languages": [
+        "Ruby"
+      ],
+      "severity": "high",
+      "title": "Uso de eval",
+      "pattern": "\\beval\\s*\\(",
+      "fix": "Evita eval: usa estructuras de datos y métodos explícitos.",
+      "bad": "eval(params[:c])",
+      "good": "send(metodo_permitido)"
+    },
+    {
+      "id": "RB-SHELL-INTERPOLATION",
+      "languages": [
+        "Ruby"
+      ],
+      "severity": "high",
+      "title": "Comando del sistema con texto interpolado",
+      "pattern": "(?:\\bsystem|\\bexec|`)\\s*\\(?\\s*\\\"[^\\\"]*#\\{",
+      "fix": "Pasa los argumentos por separado: system('ls', dir).",
+      "bad": "system(\"ls #{dir}\")",
+      "good": "system('ls', dir)"
+    },
+    {
+      "id": "RB-MARSHAL-LOAD",
+      "languages": [
+        "Ruby"
+      ],
+      "severity": "high",
+      "title": "Deserialización con Marshal o YAML.load",
+      "pattern": "\\bMarshal\\.load\\b|\\bYAML\\.load\\s*\\(",
+      "fix": "Usa JSON.parse o YAML.safe_load para datos externos.",
+      "bad": "Marshal.load(data)",
+      "good": "JSON.parse(data)"
+    }
+  ]
+}

@@ -5,6 +5,14 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y e
 
 ## [Sin publicar]
 
+## [0.5.0] - 2026-11-21
+
+### Agregado
+
+- Análisis completo y nota global (US-09): `analyze()` une todas las revisiones, elimina duplicados (el secreto prevalece), ordena por gravedad y calcula la nota A–F; si OSV falla, el reporte lo avisa. Ver ADR 0004.
+- Código inseguro (US-08): 41 reglas como datos en `packages/rules/code-rules.json` para JavaScript/TypeScript, Python, Java, C#, PHP, Go, C/C++ y Ruby, cada una con ejemplo malo y bueno verificados por las pruebas; el reporte indica qué lenguajes quedaron sin reglas.
+- Revisión de infraestructura (US-07): Dockerfile (imagen sin versión, usuario root, curl|sh, ADD remoto, chmod 777, SSH, secretos en ENV/ARG), docker-compose (privilegiado, red del host, socket de Docker) y workflows de GitHub Actions (acciones sin fijar, permisos, inyección de scripts, pull_request_target). `redactSecrets` enmascara cualquier secreto que quede en un fragmento.
+
 ## [0.4.0] - 2026-11-21
 
 ### Agregado
