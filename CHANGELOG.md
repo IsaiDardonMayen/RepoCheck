@@ -5,6 +5,8 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y e
 
 ## [Sin publicar]
 
+## [0.4.0] - 2026-11-21
+
 ### Agregado
 
 - Higiene del repo (US-06): carpetas generadas agrupadas (node_modules, dist, .vs…), archivos `.env`, llaves, bases de datos, registros, binarios y archivos grandes, carpeta `.git` en zips, y falta de `.gitignore`, README o licencia.
