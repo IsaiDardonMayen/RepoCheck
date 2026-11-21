@@ -51,6 +51,16 @@
         </div>
       </div>
 
+      <div class="downloads" role="group" aria-label="Descargar reporte">
+        <button type="button" (click)="download('html')">HTML</button>
+        <button type="button" (click)="printPdf()">PDF</button>
+        <button type="button" (click)="download('json')">JSON</button>
+        <button type="button" (click)="download('md')">Markdown</button>
+        <button type="button" class="ghost" (click)="download('svg')">Insignia (SVG)</button>
+        <button type="button" class="ghost" (click)="copyBadge()">Copiar insignia para README</button>
+        <span role="status" class="hint">@if (badgeCopied()) { Copiado }</span>
+      </div>
+
       <h3>Por categoría</h3>
       <table class="cats">
         <caption class="sr">Hallazgos y puntos descontados por categoría</caption>
