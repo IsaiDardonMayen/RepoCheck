@@ -5,6 +5,14 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y e
 
 ## [Sin publicar]
 
+## [1.0.0] - 2026-11-21
+
+### Agregado
+
+- Descargas del reporte (US-11): HTML sin scripts, PDF (con «Guardar como PDF» del navegador), JSON y Markdown. Todo se escapa y los fragmentos salen enmascarados.
+- Insignia con la nota (US-12): SVG descargable y Markdown para el README.
+- Publicación gratuita en GitHub Pages desde la rama `gh-pages` y demostración animada en el README.
+
 ## [0.6.0] - 2026-11-21
 
 ### Agregado
