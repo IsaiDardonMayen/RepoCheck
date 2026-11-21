@@ -37,3 +37,5 @@ table { border-collapse:collapse; width:100%; } th, td { text-align:left; paddin
 .detail { padding:.25rem 1rem 1rem; } pre { background:var(--bg); border:1px solid var(--line); border-radius:6px; padding:.5rem; overflow:auto; white-space:pre-wrap; word-break:break-all; }
 .coverage li { margin:.25rem 0; } footer { color:var(--muted); font-size:.9rem; padding:1rem 0 2rem; }
 @media (max-width:520px) { .row { flex-direction:column; } .langs li { grid-template-columns:6rem 1fr 3rem; } }
+.downloads { display:flex; gap:.5rem; flex-wrap:wrap; align-items:center; margin-top:1rem; } .downloads .ghost { align-self:auto; }
+@media print { .downloads, form, .drop, header p { display:none; } }

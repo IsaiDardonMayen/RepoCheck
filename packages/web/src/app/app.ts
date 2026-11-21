@@ -2,6 +2,7 @@ import { Component, computed, signal } from '@angular/core';
 import {
   CATEGORIES,
   SEVERITIES,
+  badgeSvg,
   scanRepoUrl,
   scanZip,
   type Category,
@@ -10,6 +11,9 @@ import {
   type RuleSets,
   type ScanResult,
   type Severity,
+  toHtml,
+  toJson,
+  toMarkdown,
 } from '@repocheck/core';
 import { codeRules, languages, secretRules } from '@repocheck/rules';
 
@@ -72,6 +76,65 @@ export class App {
     );
   });
   protected readonly maxLanguage = computed(() => Math.max(1, ...(this.report()?.languages.languages.map((l) => l.percent) ?? [1])));
+
+  protected readonly badgeCopied = signal(false);
+
+  private meta(): { name: string; date: string } {
+    return { name: this.result()?.source.name ?? 'repo', date: new Date().toISOString().slice(0, 10) };
+  }
+
+  private fileBase(): string {
+    return `repocheck-${this.meta().name.replace(/[^\w.-]+/g, '-')}`;
+  }
+
+  private save(content: string, ext: string, type: string): void {
+    const url = URL.createObjectURL(new Blob([content], { type }));
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${this.fileBase()}.${ext}`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  protected download(kind: 'json' | 'md' | 'html' | 'svg'): void {
+    const r = this.report();
+    if (!r) return;
+    const m = this.meta();
+    if (kind === 'json') this.save(toJson(r, m), 'json', 'application/json');
+    else if (kind === 'md') this.save(toMarkdown(r, m), 'md', 'text/markdown');
+    else if (kind === 'html') this.save(toHtml(r, m), 'html', 'text/html');
+    else this.save(badgeSvg(r.score.grade, r.score.score), 'svg', 'image/svg+xml');
+  }
+
+  /** PDF: se abre el reporte en un marco oculto y se usa «Guardar como PDF» del navegador. */
+  protected printPdf(): void {
+    const r = this.report();
+    if (!r) return;
+    const frame = document.createElement('iframe');
+    frame.setAttribute('aria-hidden', 'true');
+    frame.style.cssText = 'position:fixed;width:0;height:0;border:0';
+    frame.srcdoc = toHtml(r, this.meta());
+    frame.onload = () => {
+      frame.contentWindow?.focus();
+      frame.contentWindow?.print();
+      setTimeout(() => frame.remove(), 60000);
+    };
+    document.body.appendChild(frame);
+  }
+
+  protected async copyBadge(): Promise<void> {
+    const r = this.report();
+    if (!r) return;
+    const color = { A: 'brightgreen', B: 'green', C: 'yellow', D: 'orange', F: 'red' }[r.score.grade] ?? 'lightgrey';
+    const md = `![RepoCheck](https://img.shields.io/badge/RepoCheck-${r.score.grade}%20${r.score.score}-${color})`;
+    try {
+      await navigator.clipboard.writeText(md);
+      this.badgeCopied.set(true);
+      setTimeout(() => this.badgeCopied.set(false), 3000);
+    } catch {
+      this.error.set('No se pudo copiar. Descarga la insignia en SVG.');
+    }
+  }
 
   protected async analyzeUrl(event: Event): Promise<void> {
     event.preventDefault();
